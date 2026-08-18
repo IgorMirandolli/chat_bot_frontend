@@ -5,104 +5,346 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="CineMatch, um chatbot que recomenda filmes e series para o seu momento."
+      content="CineMatch, recomendacoes de filmes e series para o seu momento."
     />
-    <title>CineMatch | Encontre o seu proximo play</title>
+    <title>CineMatch | Sua proxima historia</title>
     <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
-    <div class="page-shell">
-      <header class="hero">
-        <p class="eyebrow">Recomendacoes para o seu momento</p>
-        <h1>Cine<span>Match</span></h1>
-        <p class="hero-description">
-          Conte como voce esta hoje e encontre um filme ou uma serie que combina
-          com o seu tempo e o seu clima.
-        </p>
-      </header>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="#inicio" aria-label="CineMatch - inicio">
+          <span class="brand-icon" aria-hidden="true"></span>
+          <span>Cine<span>Match</span></span>
+        </a>
 
-      <main class="chat-panel">
-        <div class="chat-heading">
-          <div class="bot-avatar" aria-hidden="true">CM</div>
-          <div>
-            <h2>Assistente CineMatch</h2>
-            <p><span class="status-dot"></span> Pronto para recomendar</p>
+        <p class="topbar-description">Filmes e s&eacute;ries para o seu momento</p>
+
+        <div class="assistant-status">
+          <span aria-hidden="true"></span>
+          Assistente online
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="inicio" class="hero">
+        <div class="hero-inner">
+          <div class="hero-content">
+            <p class="eyebrow">Recomenda&ccedil;&otilde;es personalizadas</p>
+            <h1>Encontre algo bom para assistir.</h1>
+            <p class="hero-text">
+              Diga o que combina com o seu momento e receba tr&ecirc;s sugest&otilde;es
+              explicadas, sem perder tempo em listas infinitas.
+            </p>
+            <a class="hero-button" href="#recomendador">
+              Come&ccedil;ar agora
+              <span aria-hidden="true">-&gt;</span>
+            </a>
+
+            <div class="hero-details" aria-label="Destaques do CineMatch">
+              <span>4 perguntas r&aacute;pidas</span>
+              <span>Resultado explicado</span>
+              <span>Gr&aacute;tis e simples</span>
+            </div>
+          </div>
+
+          <div class="hero-visual" aria-hidden="true">
+            <div class="visual-glow"></div>
+            <article class="preview-card preview-card-back">
+              <span>S&eacute;rie</span>
+              <strong>Uma escolha<br />para continuar</strong>
+              <i>85%</i>
+            </article>
+            <article class="preview-card preview-card-front">
+              <div class="preview-card-top">
+                <span>Melhor escolha</span>
+                <i>96%</i>
+              </div>
+              <div class="preview-play"></div>
+              <div>
+                <strong>Sua pr&oacute;xima<br />hist&oacute;ria</strong>
+                <p>Escolhida para o seu momento</p>
+              </div>
+            </article>
           </div>
         </div>
+      </section>
 
-        <section id="conversation" class="conversation" aria-live="polite">
-          <div class="message message-bot">
-            <p>
-              Ola! Responda quatro perguntas rapidas e eu encontrarei boas
-              opcoes para voce.
-            </p>
+      <section id="recomendador" class="quiz-section">
+        <div class="quiz-card">
+          <header class="quiz-header">
+            <div class="assistant-profile">
+              <div class="assistant-avatar" aria-hidden="true">C</div>
+              <div>
+                <strong>Assistente CineMatch</strong>
+                <span>Vamos encontrar sua pr&oacute;xima hist&oacute;ria</span>
+              </div>
+            </div>
+
+            <div class="progress-info">
+              <span id="progress-label">Etapa 1 de 4</span>
+              <div
+                class="progress-track"
+                role="progressbar"
+                aria-label="Progresso do questionario"
+                aria-valuemin="1"
+                aria-valuemax="4"
+                aria-valuenow="1"
+              >
+                <span id="progress-bar"></span>
+              </div>
+            </div>
+          </header>
+
+          <form id="preferences-form" novalidate>
+            <div class="quiz-body">
+              <section class="quiz-step" data-step="0">
+                <div class="question-heading">
+                  <span class="question-number">01</span>
+                  <div>
+                    <p>Primeiro, escolha o formato</p>
+                    <h2>O que voc&ecirc; quer assistir?</h2>
+                  </div>
+                </div>
+
+                <fieldset>
+                  <legend class="sr-only">Escolha entre filme e serie</legend>
+                  <div class="option-grid option-grid-two">
+                    <label class="option-card option-card-large">
+                      <input type="radio" name="type" value="movie" checked />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-symbol" aria-hidden="true">F</span>
+                      <span class="option-copy">
+                        <strong>Filme</strong>
+                        <small>Uma hist&oacute;ria completa para assistir agora</small>
+                      </span>
+                    </label>
+
+                    <label class="option-card option-card-large">
+                      <input type="radio" name="type" value="series" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-symbol" aria-hidden="true">S</span>
+                      <span class="option-copy">
+                        <strong>S&eacute;rie</strong>
+                        <small>Epis&oacute;dios para acompanhar no seu ritmo</small>
+                      </span>
+                    </label>
+                  </div>
+                </fieldset>
+              </section>
+
+              <section class="quiz-step" data-step="1" hidden>
+                <div class="question-heading">
+                  <span class="question-number">02</span>
+                  <div>
+                    <p>Agora escolha o estilo</p>
+                    <h2>Qual g&ecirc;nero combina com voc&ecirc;?</h2>
+                  </div>
+                </div>
+
+                <fieldset>
+                  <legend class="sr-only">Escolha um genero</legend>
+                  <div class="option-grid option-grid-four">
+                    <label class="option-card">
+                      <input type="radio" name="genre" value="ficcao-cientifica" checked />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy"><strong>Fic&ccedil;&atilde;o cient&iacute;fica</strong></span>
+                    </label>
+                    <label class="option-card">
+                      <input type="radio" name="genre" value="aventura" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy"><strong>Aventura</strong></span>
+                    </label>
+                    <label class="option-card">
+                      <input type="radio" name="genre" value="animacao" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy"><strong>Anima&ccedil;&atilde;o</strong></span>
+                    </label>
+                    <label class="option-card">
+                      <input type="radio" name="genre" value="comedia" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy"><strong>Com&eacute;dia</strong></span>
+                    </label>
+                    <label class="option-card">
+                      <input type="radio" name="genre" value="drama" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy"><strong>Drama</strong></span>
+                    </label>
+                    <label class="option-card">
+                      <input type="radio" name="genre" value="fantasia" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy"><strong>Fantasia</strong></span>
+                    </label>
+                    <label class="option-card">
+                      <input type="radio" name="genre" value="misterio" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy"><strong>Mist&eacute;rio</strong></span>
+                    </label>
+                    <label class="option-card">
+                      <input type="radio" name="genre" value="suspense" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy"><strong>Suspense</strong></span>
+                    </label>
+                  </div>
+                </fieldset>
+              </section>
+
+              <section class="quiz-step" data-step="2" hidden>
+                <div class="question-heading">
+                  <span class="question-number">03</span>
+                  <div>
+                    <p>Pense em como voc&ecirc; est&aacute; hoje</p>
+                    <h2>Qual clima voc&ecirc; procura?</h2>
+                  </div>
+                </div>
+
+                <fieldset>
+                  <legend class="sr-only">Escolha um clima</legend>
+                  <div class="option-grid option-grid-mood">
+                    <label class="option-card">
+                      <input type="radio" name="mood" value="divertido" checked />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy">
+                        <strong>Divertido</strong>
+                        <small>Para rir e desligar</small>
+                      </span>
+                    </label>
+                    <label class="option-card">
+                      <input type="radio" name="mood" value="emocionante" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy">
+                        <strong>Emocionante</strong>
+                        <small>Para sentir cada cena</small>
+                      </span>
+                    </label>
+                    <label class="option-card">
+                      <input type="radio" name="mood" value="reflexivo" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy">
+                        <strong>Reflexivo</strong>
+                        <small>Para pensar depois</small>
+                      </span>
+                    </label>
+                    <label class="option-card">
+                      <input type="radio" name="mood" value="relaxante" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy">
+                        <strong>Relaxante</strong>
+                        <small>Para uma noite tranquila</small>
+                      </span>
+                    </label>
+                    <label class="option-card">
+                      <input type="radio" name="mood" value="tenso" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy">
+                        <strong>Tenso</strong>
+                        <small>Para ficar preso &agrave; tela</small>
+                      </span>
+                    </label>
+                  </div>
+                </fieldset>
+              </section>
+
+              <section class="quiz-step" data-step="3" hidden>
+                <div class="question-heading">
+                  <span class="question-number">04</span>
+                  <div>
+                    <p>&Uacute;ltima pergunta</p>
+                    <h2>Quanto tempo voc&ecirc; tem dispon&iacute;vel?</h2>
+                  </div>
+                </div>
+
+                <fieldset>
+                  <legend class="sr-only">Escolha o tempo disponivel</legend>
+                  <div class="option-grid option-grid-four option-grid-time">
+                    <label class="option-card time-card">
+                      <input type="radio" name="maxDuration" value="30" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy">
+                        <strong>30 min</strong>
+                        <small>Algo r&aacute;pido</small>
+                      </span>
+                    </label>
+                    <label class="option-card time-card">
+                      <input type="radio" name="maxDuration" value="60" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy">
+                        <strong>1 hora</strong>
+                        <small>Uma pausa maior</small>
+                      </span>
+                    </label>
+                    <label class="option-card time-card">
+                      <input type="radio" name="maxDuration" value="120" checked />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy">
+                        <strong>2 horas</strong>
+                        <small>Sess&atilde;o completa</small>
+                      </span>
+                    </label>
+                    <label class="option-card time-card">
+                      <input type="radio" name="maxDuration" value="180" />
+                      <span class="option-check" aria-hidden="true"></span>
+                      <span class="option-copy">
+                        <strong>3 horas</strong>
+                        <small>Sem pressa hoje</small>
+                      </span>
+                    </label>
+                  </div>
+                </fieldset>
+              </section>
+
+              <p id="form-error" class="form-error" aria-live="polite"></p>
+            </div>
+
+            <footer class="quiz-actions">
+              <button id="back-button" class="button button-secondary" type="button" hidden>
+                <span aria-hidden="true">&lt;-</span>
+                Voltar
+              </button>
+
+              <span id="step-counter" class="step-counter">1 de 4</span>
+
+              <button id="next-button" class="button button-primary" type="button">
+                Continuar
+                <span aria-hidden="true">-&gt;</span>
+              </button>
+
+              <button id="submit-button" class="button button-primary" type="submit" hidden>
+                <span class="button-label">Ver recomenda&ccedil;&otilde;es</span>
+                <span aria-hidden="true">-&gt;</span>
+              </button>
+            </footer>
+          </form>
+        </div>
+      </section>
+
+      <section id="results" class="results-section" aria-labelledby="results-title" hidden>
+        <div class="results-heading">
+          <div>
+            <p class="eyebrow">Sua sele&ccedil;&atilde;o personalizada</p>
+            <h2 id="results-title">Boas op&ccedil;&otilde;es para dar o play</h2>
+            <p>Ordenamos os t&iacute;tulos de acordo com as suas respostas.</p>
           </div>
-        </section>
+          <button id="restart-button" class="button button-secondary" type="button">
+            Refazer escolhas
+          </button>
+        </div>
 
-        <form id="preferences-form" class="preferences-form">
-          <div class="field-grid">
-            <label>
-              Quero assistir
-              <select name="type" required>
-                <option value="movie">Filme</option>
-                <option value="series">Serie</option>
-              </select>
-            </label>
+        <div id="recommendation-list" class="recommendation-list"></div>
+      </section>
+    </main>
 
-            <label>
-              Genero principal
-              <select name="genre" required>
-                <option value="ficcao-cientifica">Ficcao cientifica</option>
-                <option value="aventura">Aventura</option>
-                <option value="animacao">Animacao</option>
-                <option value="comedia">Comedia</option>
-                <option value="drama">Drama</option>
-                <option value="fantasia">Fantasia</option>
-                <option value="misterio">Misterio</option>
-                <option value="suspense">Suspense</option>
-              </select>
-            </label>
-
-            <label>
-              Clima desejado
-              <select name="mood" required>
-                <option value="divertido">Divertido</option>
-                <option value="emocionante">Emocionante</option>
-                <option value="reflexivo">Reflexivo</option>
-                <option value="relaxante">Relaxante</option>
-                <option value="tenso">Tenso</option>
-              </select>
-            </label>
-
-            <label>
-              Tempo disponivel
-              <select name="maxDuration" required>
-                <option value="30">Ate 30 minutos</option>
-                <option value="60">Ate 1 hora</option>
-                <option value="120" selected>Ate 2 horas</option>
-                <option value="180">Ate 3 horas</option>
-              </select>
-            </label>
-          </div>
-
-          <button type="submit">Encontrar meu proximo play</button>
-        </form>
-
-        <section id="results" class="results" aria-labelledby="results-title" hidden>
-          <div class="results-heading">
-            <p class="eyebrow">Sua selecao</p>
-            <h2 id="results-title">Melhores combinacoes</h2>
-          </div>
-          <div id="recommendation-list" class="recommendation-list"></div>
-        </section>
-      </main>
-
-      <footer>
-        <p>Projeto full-stack desenvolvido com JavaScript e Node.js.</p>
-      </footer>
-    </div>
+    <footer class="site-footer">
+      <div>
+        <a class="brand brand-footer" href="#inicio">
+          <span class="brand-icon" aria-hidden="true"></span>
+          <span>Cine<span>Match</span></span>
+        </a>
+        <p>Projeto desenvolvido com JavaScript e Node.js.</p>
+      </div>
+    </footer>
 
     <script type="module" src="./js/app.js"></script>
   </body>
 </html>
-
