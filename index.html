@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="CineMatch, um chatbot que recomenda filmes e series para o seu momento."
+    />
+    <title>CineMatch | Encontre o seu proximo play</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <p class="eyebrow">Recomendacoes para o seu momento</p>
+        <h1>Cine<span>Match</span></h1>
+        <p class="hero-description">
+          Conte como voce esta hoje e encontre um filme ou uma serie que combina
+          com o seu tempo e o seu clima.
+        </p>
+      </header>
+
+      <main class="chat-panel">
+        <div class="chat-heading">
+          <div class="bot-avatar" aria-hidden="true">CM</div>
+          <div>
+            <h2>Assistente CineMatch</h2>
+            <p><span class="status-dot"></span> Pronto para recomendar</p>
+          </div>
+        </div>
+
+        <section id="conversation" class="conversation" aria-live="polite">
+          <div class="message message-bot">
+            <p>
+              Ola! Responda quatro perguntas rapidas e eu encontrarei boas
+              opcoes para voce.
+            </p>
+          </div>
+        </section>
+
+        <form id="preferences-form" class="preferences-form">
+          <div class="field-grid">
+            <label>
+              Quero assistir
+              <select name="type" required>
+                <option value="movie">Filme</option>
+                <option value="series">Serie</option>
+              </select>
+            </label>
+
+            <label>
+              Genero principal
+              <select name="genre" required>
+                <option value="ficcao-cientifica">Ficcao cientifica</option>
+                <option value="aventura">Aventura</option>
+                <option value="animacao">Animacao</option>
+                <option value="comedia">Comedia</option>
+                <option value="drama">Drama</option>
+                <option value="fantasia">Fantasia</option>
+                <option value="misterio">Misterio</option>
+                <option value="suspense">Suspense</option>
+              </select>
+            </label>
+
+            <label>
+              Clima desejado
+              <select name="mood" required>
+                <option value="divertido">Divertido</option>
+                <option value="emocionante">Emocionante</option>
+                <option value="reflexivo">Reflexivo</option>
+                <option value="relaxante">Relaxante</option>
+                <option value="tenso">Tenso</option>
+              </select>
+            </label>
+
+            <label>
+              Tempo disponivel
+              <select name="maxDuration" required>
+                <option value="30">Ate 30 minutos</option>
+                <option value="60">Ate 1 hora</option>
+                <option value="120" selected>Ate 2 horas</option>
+                <option value="180">Ate 3 horas</option>
+              </select>
+            </label>
+          </div>
+
+          <button type="submit">Encontrar meu proximo play</button>
+        </form>
+
+        <section id="results" class="results" aria-labelledby="results-title" hidden>
+          <div class="results-heading">
+            <p class="eyebrow">Sua selecao</p>
+            <h2 id="results-title">Melhores combinacoes</h2>
+          </div>
+          <div id="recommendation-list" class="recommendation-list"></div>
+        </section>
+      </main>
+
+      <footer>
+        <p>Projeto full-stack desenvolvido com JavaScript e Node.js.</p>
+      </footer>
+    </div>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>
+
