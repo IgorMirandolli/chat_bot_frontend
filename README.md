@@ -45,10 +45,11 @@ O endereco da API fica configurado no arquivo `js/api.js`.
 O assistente aceita respostas curtas ou varias preferencias em uma frase:
 
 ```text
-Quero uma serie de misterio, com clima tenso e episodios de ate uma hora.
+Quero um filme de acao e aventura, emocionante e de ate duas horas.
 ```
 
-Depois do resultado, tambem e possivel escrever `mudar o genero`, `mudar o
+Os generos podem ser escolhidos em sequencia ou informados juntos na mesma
+mensagem. Depois do resultado, tambem e possivel escrever `mudar os generos`, `mudar o
 clima`, `mudar o tempo` ou iniciar uma nova conversa.
 
 ## Estrutura

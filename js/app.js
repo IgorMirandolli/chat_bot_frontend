@@ -15,9 +15,10 @@ const preferenceLabels = {
     title: "Formato",
     values: { movie: "Filme", series: "S\u00e9rie" },
   },
-  genre: {
-    title: "G\u00eanero",
+  genres: {
+    title: "G\u00eaneros",
     values: {
+      acao: "A\u00e7\u00e3o",
       "ficcao-cientifica": "Fic\u00e7\u00e3o cient\u00edfica",
       aventura: "Aventura",
       animacao: "Anima\u00e7\u00e3o",
@@ -46,7 +47,7 @@ const preferenceLabels = {
 
 const inputPlaceholders = {
   type: "Ex.: quero assistir a um filme",
-  genre: "Ex.: estou com vontade de uma comedia",
+  genres: "Ex.: quero acao e aventura",
   mood: "Ex.: quero algo leve e divertido",
   maxDuration: "Ex.: tenho ate duas horas",
 };
@@ -146,9 +147,15 @@ function updatePreferenceSummary() {
     if (!definition) return;
 
     title.textContent = definition.title;
-    label.textContent = field === "maxDuration"
-      ? formatDuration(value)
-      : definition.values[value] || value;
+    if (field === "maxDuration") {
+      label.textContent = formatDuration(value);
+    } else if (field === "genres") {
+      label.textContent = value
+        .map((genre) => definition.values[genre] || genre)
+        .join(" + ");
+    } else {
+      label.textContent = definition.values[value] || value;
+    }
 
     item.append(title, label);
     preferenceSummary.append(item);
@@ -182,7 +189,7 @@ function createRecommendationCard(recommendation, index) {
 
   recommendation.genres.forEach((genre) => {
     const genreLabel = document.createElement("span");
-    genreLabel.textContent = preferenceLabels.genre.values[genre] || genre;
+    genreLabel.textContent = preferenceLabels.genres.values[genre] || genre;
     genres.append(genreLabel);
   });
   genres.className = "recommendation-genres";
