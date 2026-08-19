@@ -1,19 +1,27 @@
 const API_URL = "http://localhost:3000/api";
 
-export async function requestRecommendations(preferences) {
-  const response = await fetch(`${API_URL}/recommendations`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(preferences),
-  });
+export async function sendChatMessage(message, context) {
+  let response;
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Nao foi possivel buscar recomendacoes.");
+  try {
+    response = await fetch(`${API_URL}/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message, context }),
+    });
+  } catch {
+    throw new Error(
+      "Nao consegui conectar com a API. Confirme se o backend esta executando na porta 3000.",
+    );
   }
 
-  return data.recommendations;
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || "Nao foi possivel conversar com o Cine agora.");
+  }
+
+  return data;
 }

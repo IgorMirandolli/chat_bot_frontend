@@ -1,206 +1,333 @@
-import { requestRecommendations } from "./api.js";
+import { sendChatMessage } from "./api.js";
 
-const form = document.querySelector("#preferences-form");
-const steps = [...document.querySelectorAll(".quiz-step")];
-const progressLabel = document.querySelector("#progress-label");
-const progressBar = document.querySelector("#progress-bar");
-const progressTrack = document.querySelector(".progress-track");
-const stepCounter = document.querySelector("#step-counter");
-const formError = document.querySelector("#form-error");
-const backButton = document.querySelector("#back-button");
-const nextButton = document.querySelector("#next-button");
-const submitButton = document.querySelector("#submit-button");
-const submitLabel = submitButton.querySelector(".button-label");
-const resultsSection = document.querySelector("#results");
-const recommendationList = document.querySelector("#recommendation-list");
-const restartButton = document.querySelector("#restart-button");
-const quizSection = document.querySelector("#recomendador");
+const chatForm = document.querySelector("#chat-form");
+const chatInput = document.querySelector("#chat-input");
+const sendButton = document.querySelector("#send-button");
+const chatMessages = document.querySelector("#chat-messages");
+const quickReplies = document.querySelector("#quick-replies");
+const preferenceSummary = document.querySelector("#preference-summary");
+const newChatButton = document.querySelector("#new-chat-button");
+const chatHint = document.querySelector("#chat-hint");
+const examplePrompts = [...document.querySelectorAll(".example-prompt")];
 
-let currentStep = 0;
+const preferenceLabels = {
+  type: {
+    title: "Formato",
+    values: { movie: "Filme", series: "S\u00e9rie" },
+  },
+  genre: {
+    title: "G\u00eanero",
+    values: {
+      "ficcao-cientifica": "Fic\u00e7\u00e3o cient\u00edfica",
+      aventura: "Aventura",
+      animacao: "Anima\u00e7\u00e3o",
+      comedia: "Com\u00e9dia",
+      drama: "Drama",
+      fantasia: "Fantasia",
+      misterio: "Mist\u00e9rio",
+      suspense: "Suspense",
+    },
+  },
+  mood: {
+    title: "Clima",
+    values: {
+      divertido: "Divertido",
+      emocionante: "Emocionante",
+      reflexivo: "Reflexivo",
+      relaxante: "Relaxante",
+      tenso: "Tenso",
+    },
+  },
+  maxDuration: {
+    title: "Tempo",
+    values: {},
+  },
+};
 
-function formatLabel(value) {
-  return value.replaceAll("-", " ");
+const inputPlaceholders = {
+  type: "Ex.: quero assistir a um filme",
+  genre: "Ex.: estou com vontade de uma comedia",
+  mood: "Ex.: quero algo leve e divertido",
+  maxDuration: "Ex.: tenho ate duas horas",
+};
+
+let conversationContext = { preferences: {} };
+let isWaitingForResponse = false;
+let lastRequest = null;
+
+function wait(milliseconds) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }
 
-function getCurrentSelection() {
-  return steps[currentStep].querySelector("input:checked");
-}
-
-function clearError() {
-  formError.textContent = "";
-}
-
-function showStep(stepIndex, shouldFocus = true) {
-  currentStep = stepIndex;
-
-  steps.forEach((step, index) => {
-    step.hidden = index !== currentStep;
+function scrollToLatestMessage() {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  chatMessages.scrollTo({
+    top: chatMessages.scrollHeight,
+    behavior: reduceMotion ? "auto" : "smooth",
   });
-
-  const visibleStep = currentStep + 1;
-  const progress = (visibleStep / steps.length) * 100;
-
-  progressLabel.textContent = `Etapa ${visibleStep} de ${steps.length}`;
-  stepCounter.textContent = `${visibleStep} de ${steps.length}`;
-  progressBar.style.width = `${progress}%`;
-  progressTrack.setAttribute("aria-valuenow", visibleStep);
-
-  backButton.hidden = currentStep === 0;
-  nextButton.hidden = currentStep === steps.length - 1;
-  submitButton.hidden = currentStep !== steps.length - 1;
-  clearError();
-
-  if (shouldFocus) {
-    const heading = steps[currentStep].querySelector("h2");
-    heading.setAttribute("tabindex", "-1");
-    heading.focus({ preventScroll: true });
-  }
 }
 
-function validateCurrentStep() {
-  if (getCurrentSelection()) {
-    clearError();
-    return true;
-  }
-
-  formError.textContent = "Escolha uma opcao para continuar.";
-  return false;
+function createAssistantAvatar() {
+  const avatar = document.createElement("span");
+  avatar.className = "message-avatar";
+  avatar.textContent = "C";
+  avatar.setAttribute("aria-hidden", "true");
+  return avatar;
 }
 
-function createRecommendationCard(recommendation, position) {
+function addTextMessage(role, text, extraClass = "") {
+  const row = document.createElement("div");
+  const bubble = document.createElement("div");
+
+  row.className = `message-row message-row-${role}`;
+  if (extraClass) row.classList.add(extraClass);
+
+  bubble.className = "message-bubble";
+  bubble.textContent = text;
+
+  if (role === "assistant") {
+    row.append(createAssistantAvatar(), bubble);
+  } else {
+    row.append(bubble);
+  }
+
+  chatMessages.append(row);
+  scrollToLatestMessage();
+  return row;
+}
+
+function addSessionMarker() {
+  const marker = document.createElement("p");
+  marker.className = "session-marker";
+  marker.textContent = "Conversa iniciada agora";
+  chatMessages.append(marker);
+}
+
+function addTypingIndicator() {
+  const row = document.createElement("div");
+  const bubble = document.createElement("div");
+
+  row.className = "message-row message-row-assistant typing-row";
+  bubble.className = "message-bubble typing-bubble";
+  bubble.setAttribute("aria-label", "Cine esta digitando");
+
+  for (let index = 0; index < 3; index += 1) {
+    bubble.append(document.createElement("span"));
+  }
+
+  row.append(createAssistantAvatar(), bubble);
+  chatMessages.append(row);
+  scrollToLatestMessage();
+  return row;
+}
+
+function formatDuration(minutes) {
+  if (minutes >= 240) return "Sem limite";
+  if (minutes < 60) return `${minutes} min`;
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return remainingMinutes ? `${hours}h${remainingMinutes}` : `${hours}h`;
+}
+
+function updatePreferenceSummary() {
+  const preferences = conversationContext.preferences || {};
+  const entries = Object.entries(preferences);
+
+  preferenceSummary.replaceChildren();
+  preferenceSummary.hidden = entries.length === 0;
+
+  entries.forEach(([field, value]) => {
+    const item = document.createElement("span");
+    const title = document.createElement("small");
+    const label = document.createElement("strong");
+    const definition = preferenceLabels[field];
+
+    if (!definition) return;
+
+    title.textContent = definition.title;
+    label.textContent = field === "maxDuration"
+      ? formatDuration(value)
+      : definition.values[value] || value;
+
+    item.append(title, label);
+    preferenceSummary.append(item);
+  });
+}
+
+function createScore(score) {
+  const element = document.createElement("span");
+  element.className = "recommendation-score";
+  element.textContent = `${score}% match`;
+  return element;
+}
+
+function createRecommendationCard(recommendation, index) {
   const card = document.createElement("article");
-  const cardTop = document.createElement("div");
-  const positionLabel = document.createElement("span");
-  const scoreCircle = document.createElement("div");
-  const scoreValue = document.createElement("strong");
-  const genres = document.createElement("div");
-  const heading = document.createElement("h3");
+  const top = document.createElement("div");
+  const ranking = document.createElement("span");
+  const title = document.createElement("h3");
   const metadata = document.createElement("p");
+  const genres = document.createElement("div");
   const synopsis = document.createElement("p");
-  const reasonsTitle = document.createElement("p");
-  const reasons = document.createElement("ul");
+  const reason = document.createElement("p");
 
-  card.className = "recommendation-card";
-  if (position === 1) {
-    card.classList.add("best-match");
-  }
+  card.className = "chat-recommendation";
+  if (index === 0) card.classList.add("best-recommendation");
 
-  cardTop.className = "card-top";
-  positionLabel.className = position === 1 ? "best-badge" : "result-position";
-  positionLabel.textContent =
-    position === 1 ? "Melhor escolha" : `${position}a opcao`;
+  top.className = "recommendation-top";
+  ranking.className = "recommendation-ranking";
+  ranking.textContent = index === 0 ? "Melhor escolha" : `Op\u00e7\u00e3o 0${index + 1}`;
+  top.append(ranking, createScore(recommendation.match));
 
-  scoreCircle.className = "score-circle";
-  scoreCircle.style.setProperty("--score", `${recommendation.match * 3.6}deg`);
-  scoreValue.textContent = `${recommendation.match}%`;
-  scoreCircle.append(scoreValue);
-  cardTop.append(positionLabel, scoreCircle);
-
-  genres.className = "genre-list";
   recommendation.genres.forEach((genre) => {
     const genreLabel = document.createElement("span");
-    genreLabel.textContent = formatLabel(genre);
+    genreLabel.textContent = preferenceLabels.genre.values[genre] || genre;
     genres.append(genreLabel);
   });
+  genres.className = "recommendation-genres";
 
-  heading.textContent = recommendation.title;
-  metadata.className = "metadata";
-  metadata.textContent = `${recommendation.releaseYear} / ${recommendation.durationMinutes} minutos`;
-  synopsis.className = "synopsis";
+  title.textContent = recommendation.title;
+  metadata.className = "recommendation-metadata";
+  metadata.textContent = `${recommendation.releaseYear}  /  ${formatDuration(recommendation.durationMinutes)}`;
+  synopsis.className = "recommendation-synopsis";
   synopsis.textContent = recommendation.synopsis;
-  reasonsTitle.className = "reasons-title";
-  reasonsTitle.textContent = "Por que combina com voce";
+  reason.className = "recommendation-reason";
+  reason.textContent = recommendation.reasons[0] || "Uma op\u00e7\u00e3o para explorar algo diferente";
 
-  recommendation.reasons.forEach((reason) => {
-    const item = document.createElement("li");
-    item.textContent = reason;
-    reasons.append(item);
-  });
-
-  card.append(
-    cardTop,
-    genres,
-    heading,
-    metadata,
-    synopsis,
-    reasonsTitle,
-    reasons,
-  );
-
+  card.append(top, genres, title, metadata, synopsis, reason);
   return card;
 }
 
-function renderRecommendations(recommendations) {
-  recommendationList.replaceChildren();
+function addRecommendations(recommendations) {
+  if (!recommendations.length) return;
+
+  const row = document.createElement("div");
+  const list = document.createElement("div");
+
+  row.className = "recommendation-row";
+  list.className = "chat-recommendations";
+  list.setAttribute("aria-label", "Recomendacoes do Cine");
 
   recommendations.forEach((recommendation, index) => {
-    recommendationList.append(
-      createRecommendationCard(recommendation, index + 1),
-    );
+    list.append(createRecommendationCard(recommendation, index));
   });
 
-  resultsSection.hidden = false;
-  resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  row.append(list);
+  chatMessages.append(row);
+  scrollToLatestMessage();
 }
 
-steps.forEach((step) => {
-  step.addEventListener("change", clearError);
-});
+function clearQuickReplies() {
+  quickReplies.replaceChildren();
+  quickReplies.hidden = true;
+}
 
-nextButton.addEventListener("click", () => {
-  if (!validateCurrentStep()) {
-    return;
+function renderQuickReplies(replies, options = {}) {
+  clearQuickReplies();
+
+  if (!replies?.length) return;
+
+  replies.forEach((reply) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = reply.label;
+    button.addEventListener("click", () => {
+      submitMessage(reply.message, options.silent ? "" : reply.label);
+    });
+    quickReplies.append(button);
+  });
+
+  quickReplies.hidden = false;
+}
+
+function updateComposerState() {
+  const awaiting = conversationContext.awaiting;
+  chatInput.placeholder = inputPlaceholders[awaiting] || "Pe\u00e7a uma mudan\u00e7a ou fa\u00e7a uma nova busca...";
+  chatHint.textContent = awaiting
+    ? "Responda com suas palavras ou use uma sugest\u00e3o."
+    : "Voc\u00ea pode pedir para mudar qualquer prefer\u00eancia.";
+}
+
+function setWaitingState(waiting) {
+  isWaitingForResponse = waiting;
+  chatInput.disabled = waiting;
+  sendButton.disabled = waiting;
+  newChatButton.disabled = waiting;
+  examplePrompts.forEach((button) => {
+    button.disabled = waiting;
+  });
+}
+
+async function submitMessage(message, displayText = message) {
+  const cleanMessage = message.trim();
+  if (isWaitingForResponse || (cleanMessage === "" && displayText !== "")) return;
+
+  lastRequest = cleanMessage;
+  setWaitingState(true);
+  clearQuickReplies();
+
+  if (displayText) {
+    addTextMessage("user", displayText);
   }
 
-  showStep(currentStep + 1);
-});
-
-backButton.addEventListener("click", () => {
-  showStep(currentStep - 1);
-});
-
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  if (currentStep < steps.length - 1) {
-    if (validateCurrentStep()) {
-      showStep(currentStep + 1);
-    }
-    return;
-  }
-
-  if (!validateCurrentStep()) {
-    return;
-  }
-
-  const formData = new FormData(form);
-  const preferences = {
-    type: formData.get("type"),
-    genre: formData.get("genre"),
-    mood: formData.get("mood"),
-    maxDuration: Number(formData.get("maxDuration")),
-  };
-
-  submitButton.disabled = true;
-  submitLabel.textContent = "Buscando titulos...";
+  const typingIndicator = addTypingIndicator();
 
   try {
-    const recommendations = await requestRecommendations(preferences);
-    renderRecommendations(recommendations);
+    const [response] = await Promise.all([
+      sendChatMessage(cleanMessage, conversationContext),
+      wait(520),
+    ]);
+
+    typingIndicator.remove();
+    conversationContext = response.context;
+    addTextMessage("assistant", response.reply);
+    addRecommendations(response.recommendations || []);
+    updatePreferenceSummary();
+    updateComposerState();
+    renderQuickReplies(response.quickReplies);
   } catch (error) {
-    formError.textContent = error.message;
+    typingIndicator.remove();
+    addTextMessage("assistant", error.message, "message-row-error");
+    renderQuickReplies(
+      [{ label: "Tentar novamente", message: lastRequest }],
+      { silent: true },
+    );
   } finally {
-    submitButton.disabled = false;
-    submitLabel.textContent = "Ver recomendacoes";
+    setWaitingState(false);
+    chatInput.focus({ preventScroll: true });
   }
+}
+
+function startConversation() {
+  if (isWaitingForResponse) return;
+
+  conversationContext = { preferences: {} };
+  lastRequest = null;
+  chatMessages.replaceChildren();
+  clearQuickReplies();
+  updatePreferenceSummary();
+  addSessionMarker();
+  submitMessage("", "");
+}
+
+chatForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const message = chatInput.value.trim();
+
+  if (!message) return;
+
+  chatInput.value = "";
+  submitMessage(message);
 });
 
-restartButton.addEventListener("click", () => {
-  form.reset();
-  resultsSection.hidden = true;
-  recommendationList.replaceChildren();
-  showStep(0, false);
-  quizSection.scrollIntoView({ behavior: "smooth", block: "start" });
+newChatButton.addEventListener("click", startConversation);
+
+examplePrompts.forEach((button) => {
+  button.addEventListener("click", () => {
+    const prompt = button.dataset.prompt;
+    if (prompt) submitMessage(prompt, button.textContent.trim());
+  });
 });
 
-showStep(0, false);
+startConversation();

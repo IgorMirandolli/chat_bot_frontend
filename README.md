@@ -1,6 +1,7 @@
 # CineMatch Frontend
 
-Interface do chatbot CineMatch, que coleta as preferencias do usuario e exibe filmes ou series recomendados pela API.
+Interface conversacional do CineMatch. O usuario pode escrever frases naturais,
+usar respostas sugeridas e receber recomendacoes dentro do historico do chat.
 
 ## Tecnologias
 
@@ -38,6 +39,17 @@ npm run dev
 ```
 
 O endereco da API fica configurado no arquivo `js/api.js`.
+
+## Como conversar
+
+O assistente aceita respostas curtas ou varias preferencias em uma frase:
+
+```text
+Quero uma serie de misterio, com clima tenso e episodios de ate uma hora.
+```
+
+Depois do resultado, tambem e possivel escrever `mudar o genero`, `mudar o
+clima`, `mudar o tempo` ou iniciar uma nova conversa.
 
 ## Estrutura
 
