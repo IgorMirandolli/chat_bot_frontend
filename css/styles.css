@@ -763,6 +763,105 @@ button {
   transform: translateY(-1px);
 }
 
+.quick-replies.multi-selector {
+  display: grid;
+  max-height: 220px;
+  gap: 10px;
+  padding: 13px 20px 14px;
+}
+
+.multi-selector-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.multi-selector-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.multi-selector-copy strong {
+  color: var(--ink);
+  font-size: 0.67rem;
+}
+
+.multi-selector-copy span {
+  color: var(--muted);
+  font-size: 0.55rem;
+}
+
+.multi-counter {
+  flex: 0 0 auto;
+  color: var(--red-deep);
+  font-size: 0.55rem;
+  font-weight: 800;
+}
+
+.multi-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.multi-options .multi-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+}
+
+.multi-option::before {
+  display: grid;
+  width: 14px;
+  height: 14px;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  content: "+";
+  font-size: 0.65rem;
+  line-height: 1;
+}
+
+.multi-options .multi-option[aria-pressed="true"] {
+  border-color: var(--red);
+  color: white;
+  background: var(--red);
+  box-shadow: 0 6px 14px rgba(227, 27, 54, 0.18);
+}
+
+.multi-option[aria-pressed="true"]::before {
+  border-color: rgba(255, 255, 255, 0.7);
+  content: "\2713";
+}
+
+.multi-selector-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1px;
+}
+
+.quick-replies .multi-confirm-button {
+  min-height: 36px;
+  padding-inline: 16px;
+  border-color: var(--ink-soft);
+  color: white;
+  background: var(--ink-soft);
+}
+
+.quick-replies .multi-confirm-button:hover:not(:disabled) {
+  border-color: var(--red);
+  background: var(--red);
+}
+
+.quick-replies .multi-confirm-button:disabled {
+  border-color: #e5e0dc;
+  color: #aaa4aa;
+  background: #f2efed;
+  cursor: not-allowed;
+}
+
 .chat-composer {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1049,6 +1148,11 @@ button {
     padding-inline: 14px;
   }
 
+  .quick-replies.multi-selector {
+    max-height: 230px;
+    padding-inline: 14px;
+  }
+
   .chat-composer {
     padding-inline: 10px;
   }
@@ -1090,6 +1194,18 @@ button {
 
   .quick-replies {
     max-height: 103px;
+  }
+
+  .quick-replies.multi-selector {
+    max-height: 240px;
+  }
+
+  .multi-selector-heading {
+    align-items: flex-start;
+  }
+
+  .multi-selector-copy span {
+    max-width: 190px;
   }
 }
 

@@ -48,9 +48,11 @@ O assistente aceita respostas curtas ou varias preferencias em uma frase:
 Quero um filme de acao e aventura, emocionante e de ate duas horas.
 ```
 
-Os generos podem ser escolhidos em sequencia ou informados juntos na mesma
-mensagem. Depois do resultado, tambem e possivel escrever `mudar os generos`, `mudar o
-clima`, `mudar o tempo` ou iniciar uma nova conversa.
+Os generos e os climas podem ser marcados em seletores multiplos e enviados
+juntos pelos botoes `Confirmar generos` e `Confirmar climas`. Tambem podem ser
+informados diretamente na mesma mensagem. Depois do resultado, e possivel
+escrever `mudar os generos`, `mudar os climas`, `mudar o tempo` ou iniciar uma
+nova conversa.
 
 ## Estrutura
 

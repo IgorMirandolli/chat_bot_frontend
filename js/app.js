@@ -29,8 +29,8 @@ const preferenceLabels = {
       suspense: "Suspense",
     },
   },
-  mood: {
-    title: "Clima",
+  moods: {
+    title: "Climas",
     values: {
       divertido: "Divertido",
       emocionante: "Emocionante",
@@ -48,8 +48,23 @@ const preferenceLabels = {
 const inputPlaceholders = {
   type: "Ex.: quero assistir a um filme",
   genres: "Ex.: quero acao e aventura",
-  mood: "Ex.: quero algo leve e divertido",
+  moods: "Ex.: quero algo divertido e relaxante",
   maxDuration: "Ex.: tenho ate duas horas",
+};
+
+const multiSelectorSettings = {
+  genres: {
+    title: "Escolha seus g\u00eaneros",
+    description: "Marque uma ou mais op\u00e7\u00f5es.",
+    confirmLabel: "Confirmar g\u00eaneros",
+    messagePrefix: "Continuar com os generos",
+  },
+  moods: {
+    title: "Escolha os climas",
+    description: "Combine como voc\u00ea quer se sentir.",
+    confirmLabel: "Confirmar climas",
+    messagePrefix: "Continuar com os climas",
+  },
 };
 
 let conversationContext = { preferences: {} };
@@ -149,9 +164,9 @@ function updatePreferenceSummary() {
     title.textContent = definition.title;
     if (field === "maxDuration") {
       label.textContent = formatDuration(value);
-    } else if (field === "genres") {
+    } else if (field === "genres" || field === "moods") {
       label.textContent = value
-        .map((genre) => definition.values[genre] || genre)
+        .map((item) => definition.values[item] || item)
         .join(" + ");
     } else {
       label.textContent = definition.values[value] || value;
@@ -227,13 +242,110 @@ function addRecommendations(recommendations) {
 
 function clearQuickReplies() {
   quickReplies.replaceChildren();
+  quickReplies.classList.remove("multi-selector");
   quickReplies.hidden = true;
+}
+
+function updatePendingSelection(field, selectedValues) {
+  const preferences = { ...(conversationContext.preferences || {}) };
+
+  if (selectedValues.size > 0) {
+    preferences[field] = [...selectedValues];
+  } else {
+    delete preferences[field];
+  }
+
+  conversationContext = {
+    ...conversationContext,
+    preferences,
+    [`${field}Confirmed`]: false,
+  };
+  updatePreferenceSummary();
+}
+
+function renderMultiSelector(field) {
+  const settings = multiSelectorSettings[field];
+  const labelsByValue = preferenceLabels[field].values;
+  const selectedValues = new Set(
+    conversationContext.preferences?.[field] || [],
+  );
+  const heading = document.createElement("div");
+  const headingCopy = document.createElement("div");
+  const title = document.createElement("strong");
+  const description = document.createElement("span");
+  const counter = document.createElement("span");
+  const options = document.createElement("div");
+  const actions = document.createElement("div");
+  const confirmButton = document.createElement("button");
+
+  quickReplies.classList.add("multi-selector");
+  heading.className = "multi-selector-heading";
+  headingCopy.className = "multi-selector-copy";
+  title.textContent = settings.title;
+  description.textContent = settings.description;
+  counter.className = "multi-counter";
+  options.className = "multi-options";
+  actions.className = "multi-selector-actions";
+  confirmButton.className = "multi-confirm-button";
+  confirmButton.type = "button";
+  confirmButton.textContent = settings.confirmLabel;
+
+  function refreshSelection() {
+    const count = selectedValues.size;
+    counter.textContent = count === 1 ? "1 selecionado" : `${count} selecionados`;
+    confirmButton.disabled = count === 0;
+    updatePendingSelection(field, selectedValues);
+  }
+
+  Object.entries(labelsByValue).forEach(([value, label]) => {
+    const button = document.createElement("button");
+    button.className = "multi-option";
+    button.type = "button";
+    button.textContent = label;
+    button.setAttribute("aria-pressed", String(selectedValues.has(value)));
+
+    button.addEventListener("click", () => {
+      if (selectedValues.has(value)) {
+        selectedValues.delete(value);
+      } else {
+        selectedValues.add(value);
+      }
+
+      button.setAttribute("aria-pressed", String(selectedValues.has(value)));
+      refreshSelection();
+    });
+
+    options.append(button);
+  });
+
+  confirmButton.addEventListener("click", () => {
+    const values = [...selectedValues];
+    if (values.length === 0) return;
+
+    const labels = values.map((value) => labelsByValue[value] || value);
+    submitMessage(
+      `${settings.messagePrefix} ${labels.join(" e ")}`,
+      labels.join(" + "),
+    );
+  });
+
+  headingCopy.append(title, description);
+  heading.append(headingCopy, counter);
+  actions.append(confirmButton);
+  quickReplies.append(heading, options, actions);
+  quickReplies.hidden = false;
+  refreshSelection();
 }
 
 function renderQuickReplies(replies, options = {}) {
   clearQuickReplies();
 
   if (!replies?.length) return;
+
+  if (multiSelectorSettings[conversationContext.awaiting] && !options.silent) {
+    renderMultiSelector(conversationContext.awaiting);
+    return;
+  }
 
   replies.forEach((reply) => {
     const button = document.createElement("button");
