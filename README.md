@@ -11,6 +11,9 @@ usar respostas sugeridas e receber recomendacoes dentro do historico do chat.
 - Node.js para o servidor local
 
 O servidor usa apenas modulos nativos do Node.js. O backend deve estar executando em `http://localhost:3000`.
+Quando o token do TMDB esta configurado no backend, o chat tambem recebe
+recomendacoes do catalogo externo. A interface inclui o aviso de atribuicao
+exigido pelo TMDB.
 
 ## Como executar
 

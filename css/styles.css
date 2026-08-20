@@ -978,6 +978,29 @@ button {
   margin: 0;
 }
 
+.site-footer > div {
+  display: grid;
+  gap: 3px;
+  text-align: right;
+}
+
+.tmdb-credit {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.tmdb-credit img {
+  display: block;
+  width: 28px;
+  height: auto;
+}
+
+.tmdb-attribution {
+  font-size: 0.5rem;
+}
+
 .brand:focus-visible,
 .example-prompt:focus-visible,
 .new-chat-button:focus-visible,
@@ -1167,6 +1190,26 @@ button {
 
   .site-footer p {
     display: none;
+  }
+
+  .site-footer {
+    min-height: auto;
+    align-items: flex-start;
+    gap: 12px;
+    padding-block: 12px;
+  }
+
+  .site-footer > div {
+    text-align: left;
+  }
+
+  .tmdb-credit {
+    justify-content: flex-start;
+  }
+
+  .site-footer .tmdb-attribution {
+    display: block;
+    max-width: 280px;
   }
 }
 
